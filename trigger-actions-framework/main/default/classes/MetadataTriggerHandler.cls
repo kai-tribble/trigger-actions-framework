@@ -85,28 +85,31 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	private static final String INVALID_TYPE_ERROR = 'Please check the Trigger Action Custom Metadata for the {1} context on the {2} sObject. The {0} class does not implement the Trigger Action interface specified for the {1} context.';
 	@TestVisible
 	private static final String INVALID_CLASS_ERROR = 'Please check the Trigger Action Custom Metadata for the {1} context on the {2} sObject. The {0} class does not exist.';
+
+	private static final Boolean ENTRY_CRITERIA_ENABLED = Trigger_Action_Setting__mdt.getInstance('Default').Is_Entry_Criteria_Enabled__c;
+	private static final List<String> QUERY_TEMPLATE_PARTS = new List<String>{
+		'SELECT Apex_Class_Name__c,',
+		'DeveloperName,',
+		'Order__c,',
+		'Flow_Name__c,',
+		'Bypass_Permission__c,',
+		'Required_Permission__c,',
+		ENTRY_CRITERIA_ENABLED ? 'Entry_Criteria__c,' : '',
+		'{0}__r.TriggerRecord_Class_Name__c,',
+		'Allow_Flow_Recursion__c,',
+		'{0}__r.Bypass_Permission__c,',
+		'{0}__r.Required_Permission__c',
+		'FROM Trigger_Action__mdt',
+		'WHERE',
+		'{0}__c != NULL',
+		'AND {0}__r.Object_API_Name__c = \'\'{1}\'\'',
+		'AND {0}__r.Object_Namespace__c = \'\'{2}\'\'',
+		'AND {0}__r.Bypass_Execution__c = FALSE',
+		'AND Bypass_Execution__c = FALSE',
+		'ORDER BY Order__c ASC'
+	};
 	private static final String QUERY_TEMPLATE = String.join(
-		new List<String>{
-			'SELECT Apex_Class_Name__c,',
-			'DeveloperName,',
-			'Order__c,',
-			'Flow_Name__c,',
-			'Bypass_Permission__c,',
-			'Required_Permission__c,',
-			'Entry_Criteria__c,',
-			'{0}__r.TriggerRecord_Class_Name__c,',
-			'Allow_Flow_Recursion__c,',
-			'{0}__r.Bypass_Permission__c,',
-			'{0}__r.Required_Permission__c',
-			'FROM Trigger_Action__mdt',
-			'WHERE',
-			'{0}__c != NULL',
-			'AND {0}__r.Object_API_Name__c = \'\'{1}\'\'',
-			'AND {0}__r.Object_Namespace__c = \'\'{2}\'\'',
-			'AND {0}__r.Bypass_Execution__c = FALSE',
-			'AND Bypass_Execution__c = FALSE',
-			'ORDER BY Order__c ASC'
-		},
+		QUERY_TEMPLATE_PARTS,
 		' '
 	);
 	private static final String RELATIONSHIP_SUFFIX = '__r';
